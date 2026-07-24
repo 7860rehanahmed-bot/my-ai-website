@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<title>Mera AI Chat</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .chat-container {
+    width: 100%;
+    max-width: 500px;
+    height: 90vh;
+    background: #16213e;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .chat-header {
+    background: #0f3460;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+  }
+  .chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+  }
+  .message {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-wrap: break-word;
+  }
+  .user-message {
+    background: #e94560;
+    color: white;
+    margin-left: auto;
+  }
+  .ai-message {
+    background: #0f3460;
+    color: white;
+  }
+  .chat-input {
+    display: flex;
+    padding: 10px;
+    background: #0f3460;
+  }
+  .chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+  }
+  .chat-input button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background: #e94560;
+    color: white;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">Mera AI Chat 🤖</div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Apna message likhein...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage(message, 'user-message');
+  input.value = '';
+
+  addMessage('Soch raha hun...', 'ai-message', 'loading');
+
+  try {
+    const response = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const data = await response.json();
+    document.getElementById('loading').remove();
+    addMessage(data.reply, 'ai-message');
+  } catch (error) {
+    document.getElementById('loading').remove();
+    addMessage('Error aa gayi: ' + error.message, 'ai-message');
+  }
+}
+
+function addMessage(text, className, id) {
+  const messages = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message ' + className;
+  div.textContent = text;
+  if (id) div.id = id;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+document.getElementById('userInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+
+</body>
+</html>
